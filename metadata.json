@@ -1,0 +1,6 @@
+{
+  "name": "GRIDMIND - Unified AI IT Helpdesk",
+  "description": "AI-powered unified IT helpdesk and incident intelligence orchestration platform for enterprise systems.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
