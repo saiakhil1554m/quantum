@@ -1,394 +1,183 @@
 import React, { useState } from 'react';
-import {
-  Shield,
-  Eye,
-  EyeOff,
-  AlertCircle,
-  ArrowRight,
-  ArrowLeft,
-  User,
-  Headphones,
-  ChevronRight,
-  Sun,
-  Moon,
-  KeyRound,
-  ShieldCheck,
-} from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
-import { UserRole } from '../../types';
+import { useAuthStore, UserRole } from '../../store/useAuthStore';
+import { Atom, GraduationCap, School, ShieldCheck, ArrowRight, Sparkles, User, Lock, Mail } from 'lucide-react';
 
-interface LoginPageProps {
-  onLoginSuccess?: (role: UserRole) => void;
-  accessDeniedMessage?: string | null;
-  onClearAccessDenied?: () => void;
-}
-
-export type LoginState = 'role_selection' | 'employee_login' | 'it_support_login';
-
-export const LoginPage: React.FC<LoginPageProps> = ({
-  onLoginSuccess,
-  accessDeniedMessage,
-  onClearAccessDenied,
-}) => {
-  const { login, loading, authError, clearError } = useAuth();
-  const { theme, setTheme } = useTheme();
-
-  // 3-State Flow: 'role_selection' | 'employee_login' | 'it_support_login'
-  const [loginState, setLoginState] = useState<LoginState>('role_selection');
-
-  const [employeeId, setEmployeeId] = useState('');
+export const LoginPage: React.FC = () => {
+  const { login } = useAuthStore();
+  const [role, setRole] = useState<UserRole>('student');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
-  const [showForgotModal, setShowForgotModal] = useState(false);
-  const [formValidationError, setFormValidationError] = useState<string | null>(null);
+  const [name, setName] = useState('');
+  const [isRegister, setIsRegister] = useState(false);
 
-  const handleSelectRole = (role: 'employee' | 'it_support') => {
-    setFormValidationError(null);
-    if (authError) clearError();
-    if (onClearAccessDenied) onClearAccessDenied();
-
-    if (role === 'employee') {
-      setLoginState('employee_login');
-      setEmployeeId('EMP001');
-      setPassword('Employee@123');
-    } else {
-      setLoginState('it_support_login');
-      setEmployeeId('IT001');
-      setPassword('ITSupport@123');
-    }
-  };
-
-  const handleBackToRoleSelection = () => {
-    setLoginState('role_selection');
-    setFormValidationError(null);
-    if (authError) clearError();
-    if (onClearAccessDenied) onClearAccessDenied();
-  };
-
-  const handleEmployeeIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmployeeId(e.target.value);
-    if (formValidationError) setFormValidationError(null);
-    if (authError) clearError();
-    if (onClearAccessDenied) onClearAccessDenied();
-  };
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
-    if (formValidationError) setFormValidationError(null);
-    if (authError) clearError();
-    if (onClearAccessDenied) onClearAccessDenied();
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setFormValidationError(null);
-    if (onClearAccessDenied) onClearAccessDenied();
-
-    const cleanEmpId = employeeId.trim();
-    if (!cleanEmpId) {
-      setFormValidationError('Please enter your Employee ID.');
-      return;
-    }
-
-    if (!password) {
-      setFormValidationError('Please enter your password.');
-      return;
-    }
-
-    const selectedRole: UserRole = loginState === 'it_support_login' ? 'it_support' : 'employee';
-
-    try {
-      const authenticatedUser = await login(cleanEmpId, password, selectedRole);
-      if (onLoginSuccess) {
-        onLoginSuccess(authenticatedUser.role);
-      }
-    } catch {
-      // Error handled by AuthContext
-    }
+    const effectiveEmail = email || (role === 'teacher' ? 'prof.feynman@quantum.edu' : 'student.alex@quantum.edu');
+    login(effectiveEmail, role, name);
   };
 
-  const currentError = formValidationError || authError || accessDeniedMessage;
+  const handleQuickDemo = (demoRole: UserRole) => {
+    if (demoRole === 'student') {
+      login('alex.student@quantum.edu', 'student', 'Alex Chen (Student)');
+    } else {
+      login('feynman.prof@quantum.edu', 'teacher', 'Prof. Richard Feynman (Educator)');
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-[#DDE6ED] text-[#27374D] flex flex-col justify-between selection:bg-[#9DB2BF]/40 font-sans transition-colors duration-150">
-      {/* Minimal Header */}
-      <header className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg overflow-hidden ring-1 ring-[#9DB2BF]/40 shadow-xs">
-            <img src="/assets/ai-robot.jpg" alt="POWERGRID" className="w-full h-full object-cover" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-xs tracking-wider text-[#27374D] uppercase">
-                POWERGRID
-              </span>
-              <span className="text-[10px] font-mono font-semibold text-[#526D82] uppercase">
-                / IT HELP-DESK
-              </span>
+    <div className="min-h-screen w-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4 relative overflow-hidden font-sans">
+      {/* Background Quantum Grid Ambient Glow */}
+      <div className="absolute -top-40 -left-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+
+      {/* Main Glassmorphic Login Card */}
+      <div className="max-w-md w-full bg-slate-900/90 border border-slate-800/90 rounded-2xl p-8 shadow-2xl backdrop-blur-xl relative z-10 space-y-6">
+        {/* Platform Logo & Header */}
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-purple-600 p-0.5 shadow-lg shadow-cyan-500/20 mb-2">
+            <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center text-cyan-400">
+              <Atom className="w-8 h-8 animate-spin-slow" />
             </div>
           </div>
+          <h1 className="text-xl font-extrabold tracking-tight text-slate-100">QuantumMind AI Platform</h1>
+          <p className="text-xs text-slate-400">Interactive Quantum Computing & AI Learning Platform</p>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Role Selector Tabs */}
+        <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-950 rounded-xl border border-slate-800">
           <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="p-2 text-[#526D82] hover:text-[#27374D] hover:bg-[#9DB2BF]/20 rounded-lg transition-colors cursor-pointer"
-            title="Toggle theme"
+            type="button"
+            onClick={() => setRole('student')}
+            className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center space-x-2 transition-all ${
+              role === 'student'
+                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
           >
-            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            <GraduationCap className="w-4 h-4 text-cyan-400" />
+            <span>Student Portal</span>
           </button>
-          <span className="text-xs font-mono text-[#526D82] flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-            Zero-Trust Protected
-          </span>
+
+          <button
+            type="button"
+            onClick={() => setRole('teacher')}
+            className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center space-x-2 transition-all ${
+              role === 'teacher'
+                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <School className="w-4 h-4 text-purple-400" />
+            <span>Teacher Portal</span>
+          </button>
         </div>
-      </header>
 
-      {/* Main Centered Card Container */}
-      <main className="w-full max-w-md mx-auto px-4 py-6 flex-1 flex flex-col justify-center">
-        <div className="bg-white rounded-2xl border border-[#9DB2BF]/80 shadow-md p-6 sm:p-8 space-y-6">
-          
-          {/* ───────────────────────────────────────────────────────────── */}
-          {/* STATE 1: INITIAL ROLE SELECTION LANDING PAGE */}
-          {/* ───────────────────────────────────────────────────────────── */}
-          {loginState === 'role_selection' && (
-            <div className="space-y-6 animate-in fade-in">
-              {/* Top Section */}
-              <div className="text-center space-y-2">
-                <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-sm mx-auto ring-2 ring-[#526D82]/20 border border-[#9DB2BF]/40">
-                  <img src="/assets/ai-robot.jpg" alt="Smart IT Helpdesk" className="w-full h-full object-cover" />
-                </div>
-                <h1 className="text-xl sm:text-2xl font-bold text-[#27374D] tracking-tight">
-                  Welcome to Smart IT Helpdesk
-                </h1>
-                <p className="text-xs sm:text-sm font-medium text-[#526D82]">
-                  Please select your role to continue
-                </p>
-              </div>
-
-              {/* Error Banner */}
-              {currentError && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
-                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                  <span className="leading-relaxed">{currentError}</span>
-                </div>
-              )}
-
-              {/* Role Selection Options (Exactly Two) */}
-              <div className="space-y-3">
-                {/* Option 1: Employee */}
-                <button
-                  type="button"
-                  onClick={() => handleSelectRole('employee')}
-                  className="w-full p-4 rounded-xl bg-white hover:bg-[#DDE6ED]/50 border border-[#9DB2BF] hover:border-[#27374D] transition-all cursor-pointer shadow-xs group flex items-center justify-between text-left"
-                >
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-xl bg-[#DDE6ED] text-[#27374D] group-hover:bg-[#27374D] group-hover:text-white flex items-center justify-center transition-colors shrink-0 border border-[#9DB2BF]/50">
-                      <User className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-[#27374D]">Employee</h3>
-                      <p className="text-xs text-[#526D82]">Login as an employee</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-[#526D82] group-hover:text-[#27374D] transition-colors shrink-0" />
-                </button>
-
-                {/* Option 2: IT Support */}
-                <button
-                  type="button"
-                  onClick={() => handleSelectRole('it_support')}
-                  className="w-full p-4 rounded-xl bg-white hover:bg-[#DDE6ED]/50 border border-[#9DB2BF] hover:border-[#27374D] transition-all cursor-pointer shadow-xs group flex items-center justify-between text-left"
-                >
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-xl bg-[#DDE6ED] text-[#27374D] group-hover:bg-[#27374D] group-hover:text-white flex items-center justify-center transition-colors shrink-0 border border-[#9DB2BF]/50">
-                      <Headphones className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-[#27374D]">IT Support</h3>
-                      <p className="text-xs text-[#526D82]">Login as IT support staff</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-[#526D82] group-hover:text-[#27374D] transition-colors shrink-0" />
-                </button>
-              </div>
-
-              {/* Section Footer: Centered Shield + Statement + Dividers */}
-              <div className="pt-2">
-                <div className="flex items-center gap-3 w-full my-3">
-                  <div className="h-px bg-[#9DB2BF]/40 flex-1" />
-                  <Shield className="w-4 h-4 text-[#526D82] shrink-0" />
-                  <div className="h-px bg-[#9DB2BF]/40 flex-1" />
-                </div>
-                <p className="text-[11px] font-medium text-[#526D82] text-center">
-                  Secure. Reliable. Always here to help.
-                </p>
+        {/* Credentials Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {isRegister && (
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Full Name</label>
+              <div className="relative">
+                <User className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={role === 'teacher' ? 'Dr. Sarah Connor' : 'Alex Chen'}
+                  className="w-full bg-slate-950 text-slate-100 text-xs rounded-lg pl-9 pr-3 py-2.5 border border-slate-800 focus:outline-none focus:border-cyan-500"
+                  required
+                />
               </div>
             </div>
           )}
 
-          {/* ───────────────────────────────────────────────────────────── */}
-          {/* STATE 2 & 3: ROLE-SPECIFIC LOGIN FORM */}
-          {/* ───────────────────────────────────────────────────────────── */}
-          {loginState !== 'role_selection' && (
-            <div className="space-y-5 animate-in fade-in">
-              {/* Back to Role Selection Button */}
-              <button
-                type="button"
-                onClick={handleBackToRoleSelection}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#526D82] hover:text-[#27374D] transition-colors cursor-pointer"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Back to Role Selection</span>
-              </button>
-
-              {/* Form Title */}
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[#27374D] text-white uppercase">
-                    {loginState === 'employee_login' ? '👤 EMPLOYEE' : '🧑‍💻 IT SUPPORT'}
-                  </span>
-                </div>
-                <h1 className="text-xl font-bold text-[#27374D]">
-                  {loginState === 'employee_login' ? 'Employee Login' : 'IT Support Login'}
-                </h1>
-                <p className="text-xs text-[#526D82]">
-                  {loginState === 'employee_login'
-                    ? 'Enter your Employee ID and password to access employee services.'
-                    : 'Enter your IT Support Employee ID to access technical queues.'}
-                </p>
-              </div>
-
-              {/* Error Banner */}
-              {currentError && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
-                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                  <span className="leading-relaxed">{currentError}</span>
-                </div>
-              )}
-
-              {/* Form Fields */}
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Employee ID Field */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold text-[#27374D]">
-                    {loginState === 'employee_login' ? 'Employee ID' : 'IT Support Employee ID'}
-                  </label>
-                  <input
-                    type="text"
-                    value={employeeId}
-                    onChange={handleEmployeeIdChange}
-                    placeholder={loginState === 'employee_login' ? 'Enter your Employee ID' : 'Enter your IT Support Employee ID'}
-                    className="w-full p-3 rounded-lg bg-[#DDE6ED]/40 border border-[#9DB2BF] text-xs sm:text-sm text-[#27374D] font-mono focus:border-[#27374D] focus:bg-white focus:outline-none transition-colors"
-                  />
-                </div>
-
-                {/* Password Field */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-xs font-semibold text-[#27374D]">
-                      Password
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => setShowForgotModal(true)}
-                      className="text-xs text-[#526D82] hover:text-[#27374D] font-medium transition-colors"
-                    >
-                      Forgot password?
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={handlePasswordChange}
-                      placeholder="Enter your password"
-                      className="w-full p-3 pr-10 rounded-lg bg-[#DDE6ED]/40 border border-[#9DB2BF] text-xs sm:text-sm text-[#27374D] focus:border-[#27374D] focus:bg-white focus:outline-none transition-colors"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(prev => !prev)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#526D82] hover:text-[#27374D] p-1 cursor-pointer"
-                      title={showPassword ? 'Hide password' : 'Show password'}
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Remember Me */}
-                <div className="flex items-center justify-between pt-1">
-                  <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-[#526D82]">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={e => setRememberMe(e.target.checked)}
-                      className="rounded border-[#9DB2BF] text-[#27374D] focus:ring-[#27374D]"
-                    />
-                    <span>Remember me</span>
-                  </label>
-                </div>
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3 px-4 rounded-lg bg-[#27374D] hover:bg-[#1e2b3c] text-white font-semibold text-xs shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {loading ? (
-                    <span>Authenticating...</span>
-                  ) : (
-                    <>
-                      <span>{loginState === 'employee_login' ? 'Login as Employee' : 'Login as IT Support'}</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
-              </form>
-            </div>
-          )}
-        </div>
-      </main>
-
-      {/* Corporate Footer */}
-      <footer className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-5 text-center text-xs text-[#526D82] flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-[#9DB2BF]/40">
-        <p>POWERGRID Corporation of India Limited</p>
-        <p className="font-mono text-[11px] text-[#526D82]">
-          Smart IT Helpdesk • GRIDMIND v2.4
-        </p>
-      </footer>
-
-      {/* Forgot Password Modal */}
-      {showForgotModal && (
-        <div className="fixed inset-0 z-50 bg-[#27374D]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 border border-[#9DB2BF] shadow-xl space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[#27374D] text-white flex items-center justify-center shrink-0">
-                <KeyRound className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-[#27374D]">Reset Password</h3>
-                <p className="text-xs text-[#526D82]">POWERGRID Self-Service Password Reset</p>
-              </div>
-            </div>
-
-            <p className="text-xs text-[#526D82] leading-relaxed">
-              To reset your Active Directory domain or SAP password, please visit the official POWERGRID Self-Service Password Portal at <strong>https://sspr.powergrid.in</strong> or contact the Helpdesk Desk at <strong>Ext 4444</strong>.
-            </p>
-
-            <div className="pt-2 flex justify-end">
-              <button
-                onClick={() => setShowForgotModal(false)}
-                className="px-4 py-2 rounded-lg bg-[#27374D] text-white text-xs font-semibold hover:bg-[#1e2b3c] cursor-pointer"
-              >
-                Close
-              </button>
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+              {role === 'teacher' ? 'Educator Email' : 'Student Email'}
+            </label>
+            <div className="relative">
+              <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={role === 'teacher' ? 'prof.feynman@quantum.edu' : 'student.alex@quantum.edu'}
+                className="w-full bg-slate-950 text-slate-100 text-xs rounded-lg pl-9 pr-3 py-2.5 border border-slate-800 focus:outline-none focus:border-cyan-500"
+              />
             </div>
           </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Password</label>
+            <div className="relative">
+              <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••••••"
+                className="w-full bg-slate-950 text-slate-100 text-xs rounded-lg pl-9 pr-3 py-2.5 border border-slate-800 focus:outline-none focus:border-cyan-500"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className={`w-full py-3 rounded-xl font-bold text-xs shadow-lg flex items-center justify-center space-x-2 transition-all hover:scale-[1.01] ${
+              role === 'student'
+                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-cyan-500/20'
+                : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-purple-500/20'
+            }`}
+          >
+            <span>{isRegister ? `Register as ${role === 'teacher' ? 'Teacher' : 'Student'}` : `Sign In to ${role === 'teacher' ? 'Educator Dashboard' : 'Student Platform'}`}</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </form>
+
+        {/* Quick Demo Login Divider */}
+        <div className="relative flex py-1 items-center">
+          <div className="flex-grow border-t border-slate-800" />
+          <span className="flex-shrink mx-3 text-[10px] uppercase font-mono text-slate-500 tracking-wider">Quick Demo Access</span>
+          <div className="flex-grow border-t border-slate-800" />
         </div>
-      )}
+
+        {/* Quick Demo Buttons */}
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => handleQuickDemo('student')}
+            className="p-2.5 rounded-xl bg-slate-950 hover:bg-cyan-950/40 border border-slate-800 hover:border-cyan-500/40 text-left transition-all group"
+          >
+            <div className="flex items-center space-x-1.5 text-[11px] font-bold text-cyan-300">
+              <GraduationCap className="w-3.5 h-3.5" />
+              <span>Demo Student</span>
+            </div>
+            <p className="text-[10px] text-slate-400 mt-0.5">Access Circuit Builder & Tutor</p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleQuickDemo('teacher')}
+            className="p-2.5 rounded-xl bg-slate-950 hover:bg-purple-950/40 border border-slate-800 hover:border-purple-500/40 text-left transition-all group"
+          >
+            <div className="flex items-center space-x-1.5 text-[11px] font-bold text-purple-300">
+              <School className="w-3.5 h-3.5" />
+              <span>Demo Educator</span>
+            </div>
+            <p className="text-[10px] text-slate-400 mt-0.5">Access Class Analytics & Grading</p>
+          </button>
+        </div>
+
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={() => setIsRegister(!isRegister)}
+            className="text-xs text-slate-400 hover:text-cyan-300 underline font-medium transition-colors"
+          >
+            {isRegister ? 'Already have an account? Sign In' : "Don't have an account? Register Now"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
