@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useAuthStore } from './store/useAuthStore';
 import { LoginPage } from './components/auth/LoginPage';
-import { UnifiedDashboard } from './components/dashboard/UnifiedDashboard';
-import { TeacherDashboard } from './components/teacher/TeacherDashboard';
 import { CircuitToolbar } from './components/quantum/CircuitToolbar';
 import { GatePalette } from './components/quantum/GatePalette';
 import { CircuitCanvas } from './components/quantum/CircuitCanvas';
@@ -14,7 +12,6 @@ import { Cpu, Layers, Activity, Code2 } from 'lucide-react';
 
 export default function App() {
   const { isAuthenticated, user } = useAuthStore();
-  const [mainView, setMainView] = useState<'dashboard' | 'learning' | 'teaching'>('dashboard');
   const [isCodeEditorOpen, setIsCodeEditorOpen] = useState(false);
   const [isTimeTravelOpen, setIsTimeTravelOpen] = useState(true);
 
@@ -26,33 +23,11 @@ export default function App() {
     return <LoginPage />;
   }
 
-  // 2. Main Hub: Unified Dashboard presenting Learning & Teaching Platforms
-  if (mainView === 'dashboard') {
-    return (
-      <UnifiedDashboard
-        onOpenLearningPlatform={() => setMobileTab('circuit') || setMainView('learning')}
-        onOpenTeachingPlatform={() => setMainView('teaching')}
-      />
-    );
-  }
-
-  // 3. Educator Teaching Platform View
-  if (mainView === 'teaching') {
-    return (
-      <TeacherDashboard
-        onOpenCanvas={() => setMainView('learning')}
-        onOpenDashboard={() => setMainView('dashboard')}
-      />
-    );
-  }
-
-  // 4. Student Quantum Learning Platform View (Circuit Builder, Visualizer, Code Editor, AI Tutor)
+  // 2. Quantum Computing Studio Platform Workspace
   return (
     <div className="h-screen w-screen flex flex-col bg-slate-950 text-slate-100 overflow-hidden font-sans relative">
       {/* Top Navigation & Controls Toolbar */}
       <CircuitToolbar
-        onOpenDashboard={() => setMainView('dashboard')}
-        onOpenTeacherDashboard={() => setMainView('teaching')}
         onToggleCodeEditor={() => {
           setIsCodeEditorOpen((prev) => !prev);
           setMobileTab('code');

@@ -175,28 +175,6 @@ export const CircuitToolbar: React.FC<Props> = ({
 
           <div className="h-6 w-px bg-slate-800" />
 
-          {onOpenDashboard && (
-            <button
-              onClick={onOpenDashboard}
-              className="px-2.5 py-1.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-900/80 text-cyan-300 border border-cyan-800 text-xs font-semibold flex items-center space-x-1.5 transition-all shadow-sm"
-              title="Return to Main Unified Dashboard Hub"
-            >
-              <LayoutDashboard className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Dashboard Hub</span>
-            </button>
-          )}
-
-          {onOpenTeacherDashboard && (
-            <button
-              onClick={onOpenTeacherDashboard}
-              className="px-2.5 py-1.5 rounded-lg bg-purple-950/60 hover:bg-purple-900/60 text-purple-300 border border-purple-800 text-xs font-semibold flex items-center space-x-1.5 transition-all shadow-sm"
-              title="Switch to Educator Teaching Platform"
-            >
-              <School className="w-3.5 h-3.5 text-purple-400" />
-              <span>Teaching Platform</span>
-            </button>
-          )}
-
           <button
             onClick={clearCircuit}
             className="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-950/40 text-slate-400 hover:text-rose-300 border border-slate-700 transition-colors"
