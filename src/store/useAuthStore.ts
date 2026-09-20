@@ -22,15 +22,17 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
 
-  login: (email: string, role: UserRole, name?: string) => {
-    const defaultName = name || (role === 'teacher' ? 'Prof. Richard Feynman' : 'Alex Chen');
+  login: (email?: string, role: UserRole = 'student', name?: string) => {
+    const defaultName = name || 'Jaswanth';
+    const defaultEmail = email || 'jaswanth@quantumlearn.ai';
+
     const userProfile: UserProfile = {
-      id: `usr-${role}-${Date.now()}`,
+      id: `usr-${Date.now()}`,
       name: defaultName,
-      email,
-      role,
-      institution: 'Indian Institute of Quantum Technology (SIH)',
-      xp: role === 'student' ? 350 : 1250,
+      email: defaultEmail,
+      role: 'student',
+      institution: 'QuantumLearn Mobile Academy',
+      xp: 450,
     };
 
     localStorage.setItem('sih_quantum_user', JSON.stringify(userProfile));
