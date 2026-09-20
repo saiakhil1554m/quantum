@@ -29,15 +29,29 @@ export const GATE_DEFINITIONS: GateDefinition[] = [
 ];
 
 export const GatePalette: React.FC = () => {
-  const { loadPreset, activePreset, clearCircuit } = useQuantumStore();
+  const { loadPreset, activePreset, addGate, gates } = useQuantumStore();
 
   const handleDragStart = (event: React.DragEvent, gateType: GateType) => {
     event.dataTransfer.setData('application/quantum-gate', gateType);
     event.dataTransfer.effectAllowed = 'move';
   };
 
+  const handleGateTap = (gateType: GateType) => {
+    // Tap to add gate to active circuit position
+    const nextPos = Math.min(7, gates.length % 8);
+    const targetQubit = 0;
+    const defaultControl = targetQubit === 0 ? 1 : 0;
+
+    addGate({
+      type: gateType,
+      targets: [targetQubit],
+      controls: gateType === GateType.CNOT || gateType === GateType.CZ ? [defaultControl] : [],
+      position: nextPos,
+    });
+  };
+
   return (
-    <div className="w-80 bg-slate-900 border-r border-slate-800 p-4 flex flex-col h-full overflow-y-auto">
+    <div className="w-full md:w-80 bg-slate-900 border-r border-slate-800 p-4 flex flex-col h-full overflow-y-auto">
       <div className="flex items-center space-x-2 mb-4 pb-3 border-b border-slate-800">
         <Cpu className="w-5 h-5 text-cyan-400" />
         <h2 className="text-sm font-semibold text-slate-200 uppercase tracking-wider">Gate Toolbox</h2>
@@ -45,7 +59,7 @@ export const GatePalette: React.FC = () => {
 
       <div className="text-xs text-slate-400 mb-4 bg-slate-950 p-2.5 rounded-lg border border-slate-800 flex items-start space-x-2">
         <HelpCircle className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-        <span>Drag any quantum gate onto the circuit wire grid to add it to your algorithm.</span>
+        <span>Drag or tap any gate to add it directly to your quantum circuit wire.</span>
       </div>
 
       {/* Preset Algorithms */}
@@ -59,7 +73,7 @@ export const GatePalette: React.FC = () => {
             <button
               key={preset}
               onClick={() => loadPreset(preset)}
-              className={`text-left text-xs px-3 py-2 rounded-lg border transition-all flex items-center justify-between ${
+              className={`text-left text-xs px-3 py-2 rounded-lg border transition-all flex items-center justify-between touch-manipulation active:scale-[0.98] ${
                 activePreset === preset
                   ? 'bg-cyan-500/10 border-cyan-500 text-cyan-300 font-medium'
                   : 'bg-slate-800/50 border-slate-700/60 text-slate-300 hover:bg-slate-800 hover:border-slate-600'
@@ -82,8 +96,9 @@ export const GatePalette: React.FC = () => {
                 key={gate.type}
                 draggable
                 onDragStart={(e) => handleDragStart(e, gate.type)}
-                className={`cursor-grab active:cursor-grabbing p-2.5 rounded-lg border ${gate.color} flex flex-col items-center justify-center transition-all hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/10`}
-                title={gate.description}
+                onClick={() => handleGateTap(gate.type)}
+                className={`cursor-pointer select-none p-2.5 rounded-lg border ${gate.color} flex flex-col items-center justify-center transition-all hover:scale-105 active:scale-95 touch-manipulation shadow-sm`}
+                title={`${gate.description} (Tap to add)`}
               >
                 <span className="font-mono font-bold text-base">{gate.label}</span>
                 <span className="text-[10px] opacity-80 font-medium mt-0.5">{gate.name}</span>
@@ -100,8 +115,9 @@ export const GatePalette: React.FC = () => {
                 key={gate.type}
                 draggable
                 onDragStart={(e) => handleDragStart(e, gate.type)}
-                className={`cursor-grab active:cursor-grabbing p-2.5 rounded-lg border ${gate.color} flex flex-col items-center justify-center transition-all hover:scale-105 hover:shadow-lg hover:shadow-amber-500/10`}
-                title={gate.description}
+                onClick={() => handleGateTap(gate.type)}
+                className={`cursor-pointer select-none p-2.5 rounded-lg border ${gate.color} flex flex-col items-center justify-center transition-all hover:scale-105 active:scale-95 touch-manipulation shadow-sm`}
+                title={`${gate.description} (Tap to add)`}
               >
                 <span className="font-mono font-bold text-base">{gate.label}</span>
                 <span className="text-[10px] opacity-80 font-medium mt-0.5">{gate.name}</span>
@@ -118,8 +134,9 @@ export const GatePalette: React.FC = () => {
                 key={gate.type}
                 draggable
                 onDragStart={(e) => handleDragStart(e, gate.type)}
-                className={`cursor-grab active:cursor-grabbing p-2.5 rounded-lg border ${gate.color} flex flex-col items-center justify-center transition-all hover:scale-105 hover:shadow-lg`}
-                title={gate.description}
+                onClick={() => handleGateTap(gate.type)}
+                className={`cursor-pointer select-none p-2.5 rounded-lg border ${gate.color} flex flex-col items-center justify-center transition-all hover:scale-105 active:scale-95 touch-manipulation shadow-sm`}
+                title={`${gate.description} (Tap to add)`}
               >
                 <span className="font-mono font-bold text-base">{gate.label}</span>
                 <span className="text-[10px] opacity-80 font-medium mt-0.5">{gate.name}</span>

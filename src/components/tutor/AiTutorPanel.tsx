@@ -63,17 +63,18 @@ export const AiTutorPanel: React.FC = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-14 right-6 z-40 px-4 py-3 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-xl shadow-purple-500/30 flex items-center space-x-2 transition-all hover:scale-105"
+          className="fixed bottom-16 sm:bottom-14 right-3 sm:right-6 z-40 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-xl shadow-purple-500/30 flex items-center space-x-2 transition-all hover:scale-105 active:scale-95 touch-manipulation"
         >
-          <Bot className="w-5 h-5" />
-          <span>Ask Socratic AI Tutor</span>
+          <Bot className="w-4 h-4 sm:w-5 sm:h-5" />
+          <span className="hidden sm:inline">Ask Socratic AI Tutor</span>
+          <span className="sm:hidden font-bold">AI Tutor</span>
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
         </button>
       )}
 
       {/* Floating Chat Drawer */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-96 h-[560px] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl">
+        <div className="fixed bottom-16 sm:bottom-6 right-3 sm:right-6 z-50 w-[calc(100vw-1.5rem)] max-w-sm sm:w-96 h-[75vh] sm:h-[560px] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl">
           {/* Header */}
           <div className="px-4 py-3 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
             <div className="flex items-center space-x-2">
