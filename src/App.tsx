@@ -79,7 +79,7 @@ export default function App() {
 
         {mobileTab === 'visuals' && (
           <div className="flex-1 h-full overflow-y-auto">
-            <VisualizationPanel />
+            <VisualizationPanel isMobileView={true} />
           </div>
         )}
 

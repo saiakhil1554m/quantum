@@ -19,7 +19,11 @@ import {
   Share2,
 } from 'lucide-react';
 
-export const VisualizationPanel: React.FC = () => {
+interface Props {
+  isMobileView?: boolean;
+}
+
+export const VisualizationPanel: React.FC<Props> = ({ isMobileView }) => {
   const [viewMode, setViewMode] = useState<'split' | 'tabbed'>('split');
   const [activeTab, setActiveTab] = useState<'histogram' | 'statevector' | 'bloch' | 'qsphere' | 'density' | 'entanglement'>('qsphere');
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -28,13 +32,13 @@ export const VisualizationPanel: React.FC = () => {
   return (
     <div
       className={`bg-slate-900/95 backdrop-blur-xl border-t border-slate-800/90 flex flex-col transition-all duration-300 shadow-2xl z-30 ${
-        isCollapsed ? 'h-10' : 'h-[360px]'
+        isMobileView ? 'h-full w-full' : isCollapsed ? 'h-10' : 'h-[360px] w-full'
       }`}
     >
       {/* Top Header Bar */}
-      <div className="h-10 px-6 flex items-center justify-between border-b border-slate-800 bg-slate-950/90 shrink-0">
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
+      <div className="px-3 md:px-6 py-2 border-b border-slate-800 bg-slate-950/90 shrink-0 flex flex-wrap items-center justify-between gap-2 overflow-x-auto">
+        <div className="flex items-center space-x-3 overflow-x-auto">
+          <div className="flex items-center space-x-2 shrink-0">
             <Activity className="w-4 h-4 text-cyan-400" />
             <h2 className="text-xs font-extrabold text-slate-100 uppercase tracking-wider">
               Quantum Multi-State Visualizer
@@ -42,7 +46,7 @@ export const VisualizationPanel: React.FC = () => {
           </div>
 
           {/* Status Indicator Pill */}
-          <div className="flex items-center space-x-1.5 bg-slate-900 px-2.5 py-0.5 rounded-full border border-slate-800 text-[10px] font-mono">
+          <div className="flex items-center space-x-1.5 bg-slate-900 px-2.5 py-0.5 rounded-full border border-slate-800 text-[10px] font-mono shrink-0">
             <span
               className={`w-2 h-2 rounded-full ${
                 isSimulating
@@ -63,23 +67,23 @@ export const VisualizationPanel: React.FC = () => {
 
           {/* Noise indicator badge if active */}
           {noiseModel !== 'ideal' && (
-            <span className="text-[10px] font-mono text-rose-300 bg-rose-950/60 px-2 py-0.5 rounded border border-rose-800 flex items-center space-x-1">
+            <span className="text-[10px] font-mono text-rose-300 bg-rose-950/60 px-2 py-0.5 rounded border border-rose-800 flex items-center space-x-1 shrink-0">
               <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
-              <span>Noise: {noiseModel === 'fake_manila' ? 'IBM Manila (T1/T2)' : 'IBM Cairo (Readout)'}</span>
+              <span>Noise: {noiseModel === 'fake_manila' ? 'IBM Manila' : 'IBM Cairo'}</span>
             </span>
           )}
 
           {/* Time travel active badge */}
           {activeStepTime !== null && (
-            <span className="text-[10px] font-mono text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800">
-              Scrubbing Time t={activeStepTime}
+            <span className="text-[10px] font-mono text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800 shrink-0">
+              t={activeStepTime}
             </span>
           )}
 
-          <div className="h-4 w-px bg-slate-800" />
+          <div className="h-4 w-px bg-slate-800 hidden sm:block shrink-0" />
 
           {/* View Mode Switches: Split Grid vs Tabs */}
-          <div className="flex items-center space-x-1 bg-slate-900 p-0.5 rounded-lg border border-slate-800">
+          <div className="flex items-center space-x-1 bg-slate-900 p-0.5 rounded-lg border border-slate-800 shrink-0">
             <button
               onClick={() => {
                 setViewMode('split');
@@ -92,7 +96,8 @@ export const VisualizationPanel: React.FC = () => {
               }`}
             >
               <LayoutGrid className="w-3 h-3 text-cyan-400" />
-              <span>Multi-View Grid</span>
+              <span className="hidden sm:inline">Multi-View Grid</span>
+              <span className="sm:hidden">Grid</span>
             </button>
 
             <button
@@ -107,19 +112,20 @@ export const VisualizationPanel: React.FC = () => {
               }`}
             >
               <Layers className="w-3 h-3 text-purple-400" />
-              <span>Focused View</span>
+              <span className="hidden sm:inline">Focused View</span>
+              <span className="sm:hidden">Single</span>
             </button>
           </div>
         </div>
 
         {/* Tab selector buttons */}
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1 overflow-x-auto shrink-0">
           <button
             onClick={() => {
               setActiveTab('qsphere');
               setIsCollapsed(false);
             }}
-            className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center space-x-1 transition-all ${
+            className={`px-2 py-1 rounded text-xs font-semibold flex items-center space-x-1 transition-all whitespace-nowrap ${
               activeTab === 'qsphere'
                 ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold'
                 : 'text-slate-400 hover:text-slate-200'
@@ -134,7 +140,7 @@ export const VisualizationPanel: React.FC = () => {
               setActiveTab('entanglement');
               setIsCollapsed(false);
             }}
-            className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center space-x-1 transition-all ${
+            className={`px-2 py-1 rounded text-xs font-semibold flex items-center space-x-1 transition-all whitespace-nowrap ${
               activeTab === 'entanglement'
                 ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold'
                 : 'text-slate-400 hover:text-slate-200'
@@ -149,14 +155,14 @@ export const VisualizationPanel: React.FC = () => {
               setActiveTab('density');
               setIsCollapsed(false);
             }}
-            className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center space-x-1 transition-all ${
+            className={`px-2 py-1 rounded text-xs font-semibold flex items-center space-x-1 transition-all whitespace-nowrap ${
               activeTab === 'density'
                 ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             <Grid3X3 className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Density Matrix (ρ)</span>
+            <span>Density Matrix</span>
           </button>
 
           <button
@@ -164,7 +170,7 @@ export const VisualizationPanel: React.FC = () => {
               setActiveTab('bloch');
               setIsCollapsed(false);
             }}
-            className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center space-x-1 transition-all ${
+            className={`px-2 py-1 rounded text-xs font-semibold flex items-center space-x-1 transition-all whitespace-nowrap ${
               activeTab === 'bloch'
                 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold'
                 : 'text-slate-400 hover:text-slate-200'
@@ -179,7 +185,7 @@ export const VisualizationPanel: React.FC = () => {
               setActiveTab('histogram');
               setIsCollapsed(false);
             }}
-            className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center space-x-1 transition-all ${
+            className={`px-2 py-1 rounded text-xs font-semibold flex items-center space-x-1 transition-all whitespace-nowrap ${
               activeTab === 'histogram'
                 ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold'
                 : 'text-slate-400 hover:text-slate-200'
@@ -194,7 +200,7 @@ export const VisualizationPanel: React.FC = () => {
               setActiveTab('statevector');
               setIsCollapsed(false);
             }}
-            className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center space-x-1 transition-all ${
+            className={`px-2 py-1 rounded text-xs font-semibold flex items-center space-x-1 transition-all whitespace-nowrap ${
               activeTab === 'statevector'
                 ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold'
                 : 'text-slate-400 hover:text-slate-200'
@@ -204,32 +210,34 @@ export const VisualizationPanel: React.FC = () => {
             <span>Statevector</span>
           </button>
 
-          <div className="h-4 w-px bg-slate-800 mx-1" />
-
-          {/* Collapse / Expand Button */}
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="text-slate-400 hover:text-slate-100 p-1 rounded-lg hover:bg-slate-800 transition-colors"
-            title={isCollapsed ? 'Expand Analytics Dashboard' : 'Collapse Analytics Dashboard'}
-          >
-            {isCollapsed ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
+          {!isMobileView && (
+            <>
+              <div className="h-4 w-px bg-slate-800 mx-1" />
+              <button
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="text-slate-400 hover:text-slate-100 p-1 rounded-lg hover:bg-slate-800 transition-colors"
+                title={isCollapsed ? 'Expand Analytics Dashboard' : 'Collapse Analytics Dashboard'}
+              >
+                {isCollapsed ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
       {/* Main Panel Body */}
-      {!isCollapsed && (
-        <div className="flex-1 p-3 min-h-0 overflow-hidden">
+      {(!isCollapsed || isMobileView) && (
+        <div className="flex-1 p-3 min-h-0 overflow-y-auto">
           {viewMode === 'split' ? (
             /* Multi-column Grid: Q-Sphere, Probabilities, Density Matrix */
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-full">
-              <div className="h-full min-h-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 h-full">
+              <div className="h-72 md:h-full min-h-0">
                 <QSphereView />
               </div>
-              <div className="h-full min-h-0">
+              <div className="h-72 md:h-full min-h-0">
                 <ProbabilityChart />
               </div>
-              <div className="h-full min-h-0">
+              <div className="h-72 md:h-full min-h-0">
                 <DensityMatrixView />
               </div>
             </div>

@@ -92,7 +92,7 @@ export const CodeEditorPanel: React.FC<Props> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="w-[500px] h-full bg-slate-900 border-l border-slate-800 flex flex-col z-30 shrink-0 shadow-2xl font-sans">
+    <div className="w-full md:w-[480px] lg:w-[520px] h-full bg-slate-900 border-l border-slate-800 flex flex-col z-30 shrink-0 shadow-2xl font-sans relative">
       {/* Header */}
       <div className="h-12 px-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between shrink-0">
         <div className="flex items-center space-x-2">
