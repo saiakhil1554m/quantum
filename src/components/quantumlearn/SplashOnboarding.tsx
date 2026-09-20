@@ -1,17 +1,18 @@
 import React from 'react';
-import { useAuthStore } from '../../store/useAuthStore';
-import { Atom, ArrowRight, Sparkles } from 'lucide-react';
+import { Atom, ArrowRight } from 'lucide-react';
 
 interface Props {
   onStart: () => void;
+  onGoToLogin?: () => void;
 }
 
-export const SplashOnboarding: React.FC<Props> = ({ onStart }) => {
-  const { login } = useAuthStore();
-
+export const SplashOnboarding: React.FC<Props> = ({ onStart, onGoToLogin }) => {
   const handleGetStarted = () => {
-    login('jaswanth@quantumlearn.ai', 'student', 'Jaswanth');
-    onStart();
+    if (onGoToLogin) {
+      onGoToLogin();
+    } else {
+      onStart();
+    }
   };
 
   return (
@@ -90,3 +91,4 @@ export const SplashOnboarding: React.FC<Props> = ({ onStart }) => {
     </div>
   );
 };
+

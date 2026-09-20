@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuthStore } from './store/useAuthStore';
 import { SplashOnboarding } from './components/quantumlearn/SplashOnboarding';
+import { LoginPage } from './components/quantumlearn/LoginPage';
 import { MobileDashboard } from './components/quantumlearn/MobileDashboard';
 import { LearnModules } from './components/quantumlearn/LearnModules';
 import { LessonView } from './components/quantumlearn/LessonView';
@@ -18,19 +19,30 @@ import { TimeTravelDebugger } from './components/quantum/TimeTravelDebugger';
 import { VisualizationPanel } from './components/visualization/VisualizationPanel';
 import { AiTutorPanel } from './components/tutor/AiTutorPanel';
 
-type MobileScreen = 'splash' | 'home' | 'learn' | 'lesson' | 'playground' | 'results' | 'quiz' | 'tutor';
+type MobileScreen = 'splash' | 'login' | 'home' | 'learn' | 'lesson' | 'playground' | 'results' | 'quiz' | 'tutor';
 
 export default function App() {
   const { isAuthenticated } = useAuthStore();
-  const [currentScreen, setCurrentScreen] = useState<MobileScreen>('splash');
+  const [currentScreen, setCurrentScreen] = useState<MobileScreen>('login');
   const [isCodeEditorOpen, setIsCodeEditorOpen] = useState(false);
   const [isTimeTravelOpen, setIsTimeTravelOpen] = useState(true);
 
-  // 1. Unauthenticated or Splash Screen -> Render Onboarding Splash
-  if (!isAuthenticated || currentScreen === 'splash') {
+  // 1. Splash Screen
+  if (currentScreen === 'splash') {
     return (
       <SplashOnboarding
-        onStart={() => setCurrentScreen('home')}
+        onStart={() => setCurrentScreen('login')}
+        onGoToLogin={() => setCurrentScreen('login')}
+      />
+    );
+  }
+
+  // 2. Unauthenticated -> Login Page
+  if (!isAuthenticated || currentScreen === 'login') {
+    return (
+      <LoginPage
+        onLoginSuccess={() => setCurrentScreen('home')}
+        onBackToSplash={() => setCurrentScreen('splash')}
       />
     );
   }
@@ -111,4 +123,5 @@ export default function App() {
     </div>
   );
 }
+
 
