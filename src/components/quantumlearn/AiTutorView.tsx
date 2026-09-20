@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Bot, Send, Sparkles, MessageSquare, ChevronLeft, MoreVertical } from 'lucide-react';
-import { askAiTutor, TutorChatResponse } from '../../services/tutorApi';
+import React, { useState, useEffect } from 'react';
+import { Bot, Send, Sparkles, MessageSquare, ChevronLeft, Brain, Plus, CheckCircle, BookOpen, X } from 'lucide-react';
+import { askAiTutor, TutorChatResponse, ingestCustomDocument, getStoredCustomDocs, RagDocItem } from '../../services/tutorApi';
 import { useQuantumStore } from '../../store/useQuantumStore';
 
 interface ChatMessage {
@@ -17,13 +17,26 @@ export const AiTutorView: React.FC<Props> = ({ onBack }) => {
   const { getCircuitPayload, executionResult } = useQuantumStore();
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showTrainer, setShowTrainer] = useState(false);
+  
+  // Training form state
+  const [trainTitle, setTrainTitle] = useState('');
+  const [trainContent, setTrainContent] = useState('');
+  const [isTraining, setIsTraining] = useState(false);
+  const [trainSuccess, setTrainSuccess] = useState('');
+  const [customDocs, setCustomDocs] = useState<RagDocItem[]>([]);
+
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'welcome',
       sender: 'tutor',
-      text: "Hello Jaswanth! I'm your Socratic AI Quantum Tutor. Ask me any question about superposition, Hadamard gates, or quantum algorithms!",
+      text: "Hello! I'm your Socratic AI Quantum Tutor. Ask me any question about superposition, Hadamard gates, or train me with your custom lecture notes!",
     },
   ]);
+
+  useEffect(() => {
+    setCustomDocs(getStoredCustomDocs());
+  }, []);
 
   const handleSend = async (textToSend?: string) => {
     const promptText = textToSend || query;
@@ -52,6 +65,39 @@ export const AiTutorView: React.FC<Props> = ({ onBack }) => {
     setLoading(false);
   };
 
+  const handleTrainModel = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!trainTitle.trim() || !trainContent.trim() || isTraining) return;
+
+    setIsTraining(true);
+    setTrainSuccess('');
+
+    await ingestCustomDocument(trainTitle, trainContent);
+    const updatedDocs = getStoredCustomDocs();
+    setCustomDocs(updatedDocs);
+
+    setIsTraining(false);
+    setTrainSuccess(`Successfully trained AI Model on "${trainTitle}"!`);
+    
+    // Add dynamic feedback in chat
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `trained-${Date.now()}`,
+        sender: 'tutor',
+        text: `🎓 I've ingested your new lecture notes on "${trainTitle}"! Ask me questions about it now!`,
+      },
+    ]);
+
+    setTrainTitle('');
+    setTrainContent('');
+
+    setTimeout(() => {
+      setTrainSuccess('');
+      setShowTrainer(false);
+    }, 1800);
+  };
+
   return (
     <div className="flex-1 bg-[#0b0d19] text-slate-100 flex flex-col h-full overflow-hidden font-sans pb-16">
       {/* Top Header */}
@@ -64,8 +110,12 @@ export const AiTutorView: React.FC<Props> = ({ onBack }) => {
           <span>AI Tutor</span>
         </button>
 
-        <button className="text-slate-400 hover:text-slate-200">
-          <MoreVertical className="w-4 h-4" />
+        <button
+          onClick={() => setShowTrainer(true)}
+          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[11px] font-semibold shadow-md shadow-purple-600/30 hover:scale-105 active:scale-95 transition-all"
+        >
+          <Brain className="w-3.5 h-3.5" />
+          <span>Train AI Model</span>
         </button>
       </div>
 
@@ -84,8 +134,16 @@ export const AiTutorView: React.FC<Props> = ({ onBack }) => {
 
           <h2 className="text-sm font-bold text-slate-100">Ask your quantum questions</h2>
           <p className="text-[11px] text-slate-400 max-w-xs mx-auto leading-relaxed">
-            Get clear explanations, hints, and help with your circuits.
+            Get clear explanations, hints, and custom RAG trained responses.
           </p>
+
+          {/* Quick train badge if custom docs exist */}
+          {customDocs.length > 0 && (
+            <div className="pt-1 flex items-center justify-center space-x-1.5 text-[10px] text-purple-300">
+              <BookOpen className="w-3 h-3 text-purple-400" />
+              <span>{customDocs.length} Custom Trained Topic{customDocs.length > 1 ? 's' : ''} Active</span>
+            </div>
+          )}
         </div>
 
         {/* Suggestion Chips */}
@@ -95,7 +153,9 @@ export const AiTutorView: React.FC<Props> = ({ onBack }) => {
               'Why does the Hadamard gate create superposition?',
               'Explain my current circuit',
               'What is entanglement?',
-              'Help me with this quiz question',
+              ...(customDocs.length > 0
+                ? [`Tell me about ${customDocs[0].title}`]
+                : ['Help me with this quiz question']),
             ].map((preset, idx) => (
               <button
                 key={idx}
@@ -119,7 +179,7 @@ export const AiTutorView: React.FC<Props> = ({ onBack }) => {
               className={`max-w-[85%] p-3.5 rounded-2xl text-xs leading-relaxed shadow-md ${
                 msg.sender === 'user'
                   ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-br-none'
-                  : 'bg-[#121526] border border-[#1e2238] text-slate-200 rounded-bl-none'
+                  : 'bg-[#121526] border border-[#1e2238] text-slate-200 rounded-bl-none whitespace-pre-wrap'
               }`}
             >
               {msg.text}
@@ -153,6 +213,119 @@ export const AiTutorView: React.FC<Props> = ({ onBack }) => {
           <Send className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Train AI Model Modal */}
+      {showTrainer && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-[#0d0f22] border border-[#1e2238] rounded-3xl p-5 shadow-2xl relative space-y-4">
+            <div className="flex items-center justify-between border-b border-[#1e2238] pb-3">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                  <Brain className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-100">Train AI Tutor Model</h3>
+                  <p className="text-[10px] text-slate-400">Add custom lecture notes or Q&A pairs to RAG memory</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowTrainer(false)}
+                className="text-slate-400 hover:text-white p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {trainSuccess ? (
+              <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center space-x-3 text-emerald-400 text-xs">
+                <CheckCircle className="w-5 h-5 shrink-0" />
+                <span>{trainSuccess}</span>
+              </div>
+            ) : (
+              <form onSubmit={handleTrainModel} className="space-y-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                    Topic / Document Title
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={trainTitle}
+                    onChange={(e) => setTrainTitle(e.target.value)}
+                    placeholder="e.g. Shor's Algorithm Notes"
+                    className="w-full bg-[#121526] text-slate-100 text-xs px-3.5 py-2.5 rounded-xl border border-[#1e2238] focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                    Knowledge Content / Explanation
+                  </label>
+                  <textarea
+                    required
+                    rows={4}
+                    value={trainContent}
+                    onChange={(e) => setTrainContent(e.target.value)}
+                    placeholder="Paste lecture content, formulas, or Q&A pairs to teach the AI Tutor..."
+                    className="w-full bg-[#121526] text-slate-100 text-xs p-3 rounded-xl border border-[#1e2238] focus:outline-none focus:border-purple-500 resize-none"
+                  />
+                </div>
+
+                <div className="pt-2 flex items-center justify-end space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowTrainer(false)}
+                    className="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isTraining || !trainTitle.trim() || !trainContent.trim()}
+                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-semibold shadow-lg shadow-purple-600/30 hover:scale-105 active:scale-95 transition-all disabled:opacity-40 flex items-center space-x-1.5"
+                  >
+                    {isTraining ? (
+                      <>
+                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Training...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Train Model</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* List of custom trained topics */}
+            {customDocs.length > 0 && (
+              <div className="pt-2 border-t border-[#1e2238]">
+                <h4 className="text-[11px] font-bold text-slate-300 mb-2 flex items-center space-x-1">
+                  <BookOpen className="w-3 h-3 text-purple-400" />
+                  <span>Currently Trained Custom Topics ({customDocs.length})</span>
+                </h4>
+                <div className="max-h-28 overflow-y-auto space-y-1.5 pr-1">
+                  {customDocs.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="p-2 bg-[#121526] border border-[#1e2238] rounded-xl text-[11px] flex items-center justify-between"
+                    >
+                      <span className="font-semibold text-purple-300 truncate max-w-[200px]">
+                        {doc.title}
+                      </span>
+                      <span className="text-[9px] text-slate-500 font-mono">Active</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
