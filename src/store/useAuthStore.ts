@@ -18,13 +18,9 @@ interface AuthState {
   logout: () => void;
 }
 
-// Load initial user session from localStorage if available
-const storedUserJson = localStorage.getItem('sih_quantum_user');
-const initialUser: UserProfile | null = storedUserJson ? JSON.parse(storedUserJson) : null;
-
 export const useAuthStore = create<AuthState>((set) => ({
-  user: initialUser,
-  isAuthenticated: !!initialUser,
+  user: null,
+  isAuthenticated: false,
 
   login: (email: string, role: UserRole, name?: string) => {
     const defaultName = name || (role === 'teacher' ? 'Prof. Richard Feynman' : 'Alex Chen');

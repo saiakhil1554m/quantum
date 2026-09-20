@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuthStore } from './store/useAuthStore';
 import { LoginPage } from './components/auth/LoginPage';
+import { UnifiedDashboard } from './components/dashboard/UnifiedDashboard';
 import { TeacherDashboard } from './components/teacher/TeacherDashboard';
 import { CircuitToolbar } from './components/quantum/CircuitToolbar';
 import { GatePalette } from './components/quantum/GatePalette';
@@ -9,35 +10,49 @@ import { CodeEditorPanel } from './components/quantum/CodeEditorPanel';
 import { TimeTravelDebugger } from './components/quantum/TimeTravelDebugger';
 import { VisualizationPanel } from './components/visualization/VisualizationPanel';
 import { AiTutorPanel } from './components/tutor/AiTutorPanel';
-import { Cpu, Layers, Activity, Code2, Bot } from 'lucide-react';
+import { Cpu, Layers, Activity, Code2 } from 'lucide-react';
 
 export default function App() {
   const { isAuthenticated, user } = useAuthStore();
-  const [activeTeacherView, setActiveTeacherView] = useState<'dashboard' | 'canvas'>('dashboard');
+  const [mainView, setMainView] = useState<'dashboard' | 'learning' | 'teaching'>('dashboard');
   const [isCodeEditorOpen, setIsCodeEditorOpen] = useState(false);
   const [isTimeTravelOpen, setIsTimeTravelOpen] = useState(true);
 
   // Mobile active tab view ('circuit' | 'gates' | 'visuals' | 'code')
   const [mobileTab, setMobileTab] = useState<'circuit' | 'gates' | 'visuals' | 'code'>('circuit');
 
-  // 1. If not logged in, show Login / Register page
+  // 1. First Screen: Always open Login Page if unauthenticated
   if (!isAuthenticated || !user) {
     return <LoginPage />;
   }
 
-  // 2. If logged in as Teacher/Educator and currently viewing Teacher Dashboard
-  if (user.role === 'teacher' && activeTeacherView === 'dashboard') {
-    return <TeacherDashboard onOpenCanvas={() => setActiveTeacherView('canvas')} />;
+  // 2. Main Hub: Unified Dashboard presenting Learning & Teaching Platforms
+  if (mainView === 'dashboard') {
+    return (
+      <UnifiedDashboard
+        onOpenLearningPlatform={() => setMobileTab('circuit') || setMainView('learning')}
+        onOpenTeachingPlatform={() => setMainView('teaching')}
+      />
+    );
   }
 
-  // 3. Render Quantum Circuit Workspace
+  // 3. Educator Teaching Platform View
+  if (mainView === 'teaching') {
+    return (
+      <TeacherDashboard
+        onOpenCanvas={() => setMainView('learning')}
+        onOpenDashboard={() => setMainView('dashboard')}
+      />
+    );
+  }
+
+  // 4. Student Quantum Learning Platform View (Circuit Builder, Visualizer, Code Editor, AI Tutor)
   return (
     <div className="h-screen w-screen flex flex-col bg-slate-950 text-slate-100 overflow-hidden font-sans relative">
       {/* Top Navigation & Controls Toolbar */}
       <CircuitToolbar
-        onOpenTeacherDashboard={
-          user.role === 'teacher' ? () => setActiveTeacherView('dashboard') : undefined
-        }
+        onOpenDashboard={() => setMainView('dashboard')}
+        onOpenTeacherDashboard={() => setMainView('teaching')}
         onToggleCodeEditor={() => {
           setIsCodeEditorOpen((prev) => !prev);
           setMobileTab('code');

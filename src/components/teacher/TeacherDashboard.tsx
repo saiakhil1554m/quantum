@@ -36,9 +36,10 @@ const MOCK_ROSTER: StudentRosterItem[] = [
 
 interface Props {
   onOpenCanvas: () => void;
+  onOpenDashboard?: () => void;
 }
 
-export const TeacherDashboard: React.FC<Props> = ({ onOpenCanvas }) => {
+export const TeacherDashboard: React.FC<Props> = ({ onOpenCanvas, onOpenDashboard }) => {
   const { user, logout } = useAuthStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [showAssignModal, setShowAssignModal] = useState(false);
@@ -82,30 +83,39 @@ export const TeacherDashboard: React.FC<Props> = ({ onOpenCanvas }) => {
   return (
     <div className="min-h-screen w-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
       {/* Educator Header Navigation */}
-      <header className="h-16 bg-slate-900 border-b border-slate-800 px-8 flex items-center justify-between shrink-0">
+      <header className="h-16 bg-slate-900 border-b border-slate-800 px-4 md:px-8 flex items-center justify-between shrink-0">
         <div className="flex items-center space-x-3">
           <div className="w-9 h-9 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400">
             <GraduationCap className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-slate-100 leading-none">Quantum Educator Portal</h1>
-            <p className="text-[11px] text-purple-400 mt-0.5">Automated Test Suites, Unitary Verifier & Student LMS</p>
+            <h1 className="text-sm font-bold text-slate-100 leading-none">Educator Teaching Platform</h1>
+            <p className="text-[11px] text-purple-400 mt-0.5">Automated Test Suites, Unitary Verifier & Class LMS</p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3">
+          {onOpenDashboard && (
+            <button
+              onClick={onOpenDashboard}
+              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs transition-all flex items-center space-x-1.5"
+            >
+              <span>Dashboard Hub</span>
+            </button>
+          )}
+
           <button
             onClick={onOpenCanvas}
-            className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold text-xs shadow-md shadow-cyan-500/20 flex items-center space-x-2 transition-all hover:scale-105"
+            className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold text-xs shadow-md shadow-cyan-500/20 flex items-center space-x-1.5 transition-all hover:scale-105"
           >
             <Cpu className="w-4 h-4" />
-            <span>Launch Circuit Builder Canvas</span>
+            <span>Learning Platform</span>
           </button>
 
-          <div className="h-6 w-px bg-slate-800" />
+          <div className="h-6 w-px bg-slate-800 hidden sm:block" />
 
           <div className="flex items-center space-x-3">
-            <div className="text-right text-xs">
+            <div className="text-right text-xs hidden sm:block">
               <span className="font-bold text-slate-200 block">{user?.name}</span>
               <span className="text-[10px] text-purple-400 font-mono">Educator / Instructor</span>
             </div>
